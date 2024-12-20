@@ -14,7 +14,8 @@ Open the index.html file in any modern web browser.
 Use the Choose File button to upload a JSON file with the required format.
 Click Generate Dashboard to view the visualizations.
 JSON File Format
-Ensure your JSON file matches this format:
+Ensure your JSON file matches this format:[Uploading csvjson.json…]()
+
 
 json
 Copy code
@@ -28,6 +29,7 @@ Copy code
         "Customer Name": "John Doe",
         "Ship Mode": "Standard Class"
     },
+    
     {
         "Category": "Furniture",
         "Region": "South",
@@ -38,15 +40,19 @@ Copy code
         "Ship Mode": "First Class"
     }
 ]
+
+
 🛠 Built With
 HTML: Markup for the structure of the web page.
 CSS: Styling to enhance visual appeal.
 JavaScript: Logic for parsing JSON and generating dynamic charts.
 Plotly.js: For creating interactive and responsive charts.
+
+
 📊 Sample Visualizations
 ![Screenshot 2024-12-20 125306](https://github.com/user-attachments/assets/aa036980-1fdc-4f32-82a8-9b4b3480d556)
 
 🔗 Demo
-Explore the live project here. 
+Explore the live project here. https://charansingh14853.github.io/interactive-sales-dashboard/
 
 
