@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Sales Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #d1f0f7;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-top: 20px;
+        }
+        .container {
+            padding: 20px;
+        }
+        .file-input {
+            margin: 20px 0;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .chart {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Sales Dashboard</h1>
+    <div class="container">
+        <input type="file" id="fileInput" class="file-input">
+        <button id="generateDashboard">Generate Dashboard</button>
+    </div>
+    <div class="dashboard">
+        <div id="salesByCategory" class="chart">Loading...</div>
+        <div id="profitByRegion" class="chart">Loading...</div>
+        <div id="salesTrends" class="chart">Loading...</div>
+        <div id="topCustomers" class="chart">Loading...</div>
+        <div id="shippingModes" class="chart">Loading...</div>
+    </div>
+
+    <script>
+        document.getElementById('generateDashboard').addEventListener('click', () => {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a JSON file to upload.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const salesData = JSON.parse(event.target.result);
+                    generateDashboard(salesData);
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    alert('Invalid JSON file format.');
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        function generateDashboard(data) {
+            const categories = {};
+            const regions = {};
+            const trends = {};
+            const customers = {};
+            const shippingModes = {};
+
+            data.forEach(item => {
+                if (!item.Category || !item.Region || !item.Sales || !item.Profit || !item['Order Date']) {
+                    console.warn('Skipping incomplete item:', item);
+                    return;
+                }
+
+                categories[item.Category] = (categories[item.Category] || 0) + item.Sales;
+                regions[item.Region] = (regions[item.Region] || 0) + item.Profit;
+                const orderMonth = item['Order Date'].slice(0, 7);
+                trends[orderMonth] = (trends[orderMonth] || 0) + item.Sales;
+                customers[item['Customer Name']] = (customers[item['Customer Name']] || 0) + item.Sales;
+                shippingModes[item['Ship Mode']] = (shippingModes[item['Ship Mode']] || 0) + item.Sales;
+            });
+
+            const layout = { height: 300, margin: { t: 50, l: 50, r: 50, b: 50 } };
+
+            Plotly.newPlot('salesByCategory', [{
+                x: Object.keys(categories),
+                y: Object.values(categories),
+                type: 'bar',
+                marker: { color: 'blue' }
+            }], { ...layout, title: 'Sales by Category' });
+
+            Plotly.newPlot('profitByRegion', [{
+                x: Object.keys(regions),
+                y: Object.values(regions),
+                type: 'bar',
+                marker: { color: 'green' }
+            }], { ...layout, title: 'Profit by Region' });
+
+            const sortedMonths = Object.keys(trends).sort((a, b) => new Date(a) - new Date(b));
+            Plotly.newPlot('salesTrends', [{
+                x: sortedMonths,
+                y: sortedMonths.map(month => trends[month]),
+                type: 'scatter',
+                mode: 'lines+markers',
+                marker: { color: 'purple' }
+            }], { ...layout, title: 'Sales Trends Over Time' });
+
+            const topCustomers = Object.entries(customers)
+                .sort(([, a], [, b]) => b - a)
+                .slice(0, 10);
+            Plotly.newPlot('topCustomers', [{
+                x: topCustomers.map(([name]) => name),
+                y: topCustomers.map(([, sales]) => sales),
+                type: 'bar',
+                marker: { color: 'orange' }
+            }], { ...layout, title: 'Top Customers' });
+
+            Plotly.newPlot('shippingModes', [{
+                labels: Object.keys(shippingModes),
+                values: Object.values(shippingModes),
+                type: 'pie'
+            }], { ...layout, title: 'Shipping Modes' });
+        }
+    </script>
+</body>
+</html>
